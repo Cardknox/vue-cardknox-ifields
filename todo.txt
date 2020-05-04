@@ -1,0 +1,9 @@
+ * add watch to cvv to get token on issuer update
+
+ * if invalid data clear token
+
+ * add defaults for options
+
+ * add error event to readMe
+
+ * add desc to readMe for 3DSecure
