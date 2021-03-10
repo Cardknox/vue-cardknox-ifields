@@ -1,6 +1,6 @@
 <template>
   <iframe
-    :src="'https://cdn.cardknox.com/ifields/' + version + '/ifield.htm'"
+    :src="'https://cdn.cardknox.com/ifields/' + IFIELDS_VERSION + '/ifield.htm'"
     ref="iFrameRef"
     :title="type"
   />
@@ -14,7 +14,8 @@ import {
   CARD_TYPE,
   CVV_TYPE,
   // WAIT_FOR_3DS_RESPONSE_TIMEOUT_DEFAULT,
-  AUTO_FORMAT_DEFAULT_SEPARATOR
+  AUTO_FORMAT_DEFAULT_SEPARATOR,
+  IFIELDS_VERSION
 } from "./constants";
 import * as eventHandlers from "./eventHandlers";
 import * as actions from "./actions";
@@ -28,11 +29,11 @@ export default {
       latestErrorTime: null,
       xTokenData: {},
       _tokenValid: false,
-      tokenLoading: false
+      tokenLoading: false,
+      IFIELDS_VERSION: Object.freeze(IFIELDS_VERSION)
     };
   },
   props: {
-    version: String,
     type: String,
     account: {
       type: Object,
@@ -87,7 +88,8 @@ export default {
     validateProps: functions.validateProps,
     log: functions.log,
     logAction: functions.logAction,
-    error: functions.error
+    error: functions.error,
+    transformAccountData: functions.transformAccountData
   },
   mounted: function() {
     window.addEventListener("message", this.onMessage);
@@ -97,8 +99,9 @@ export default {
     window.removeEventListener("message", this.onMessage);
   },
   watch: {
-    account: function(val) {
-      this.setAccount(val);
+    account: function (val) {
+      const newAccount = this.transformAccountData(val);
+      this.setAccount(newAccount);
     },
     threeDS: function(val, oldVal) {
       if (this.type !== CARD_TYPE) return;
@@ -136,20 +139,16 @@ export default {
         this.setPlaceholder(val.placeholder);
       if (val.iFieldstyle !== oldVal.iFieldstyle)
         this.setStyle(val.iFieldstyle);
-    },
-    computed: function() {
-      return {
-        tokenValid: {
-          get() {
-            return (
-              this._tokenValid && this.xTokenData && this.xTokenData.xToken
-            );
-          },
-          set(value) {
-            this._tokenValid = value;
-          }
-        }
-      };
+    }
+  },
+  computed: {
+    tokenValid: {
+      get() {
+        return this._tokenValid && this.xTokenData && this.xTokenData.xToken;
+      },
+      set(value) {
+        this._tokenValid = value;
+      }
     }
   }
 };

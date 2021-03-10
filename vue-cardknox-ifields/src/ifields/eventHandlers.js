@@ -45,7 +45,8 @@ export function _onMessage(e) {
 }
 export function _onLoad() {
     this.iFrameLoaded = true;
-    this.setAccount(this.account);
+    const newAccount = this.transformAccountData(this.account);
+    this.setAccount(newAccount);
     if (this.type === CARD_TYPE && this.threeDS.enable3DS) {
         this.enable3DS(this.threeDS.waitForResponse, this.threeDS.waitForResponseTimeout);
         this.update3DS(AMOUNT, this.threeDS.amount);
@@ -96,6 +97,9 @@ export function _onUpdate({ data }) {
     };
     if (data.isValid && !this.tokenValid && !this.tokenLoading) {
         this.getToken();
+    }
+    if (!data.isValid) {
+        this.tokenValid = false;
     }
     switch (data.event) {
         case 'input':
